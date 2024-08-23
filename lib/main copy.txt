@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // 追加: MethodChannelを利用するために必要
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'profile_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/profile': (context) => const ProfileScreen(), //ルート設定
+      },
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  static const platform = MethodChannel(
+      'com.example.flutterfire_test/usage'); // 追加: MethodChannelの設定
+  int _counter = 0;
+
+  // 追加: ネイティブコードを呼び出すメソッド
+  Future<void> _getUsageStats() async {
+    try {
+      final result = await platform.invokeMethod('getUsageStats');
+      print('Usage Stats: $result');
+    } on PlatformException catch (e) {
+      print("Failed to get usage stats: '${e.message}'.");
+    }
+  }
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+
+    _getUsageStats(); // 追加: ボタンが押されたときにネイティブコードを呼び出す
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '$_counter回',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/profile');
+              },
+              child: const Text('Go to Profile Screen'),
+            )
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
