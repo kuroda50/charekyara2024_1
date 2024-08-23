@@ -6,8 +6,8 @@ import 'sign_in.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   print('Firebase 初期化を開始します');
-    await Firebase.initializeApp();
-    print('Firebase 初期化が完了しました');
+  await Firebase.initializeApp();
+  print('Firebase 初期化が完了しました');
 
   runApp(MyApp());
 }
